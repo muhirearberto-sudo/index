@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProCBT - Professional Exam System</title>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-hover: #4338CA;
+            --secondary: #64748B;
+            --success: #10B981;
+            --danger: #EF4444;
+            --warning: #F59E0B;
+            --background: #F3F4F6;
+            --surface: #FFFFFF;
+            --text-main: #1F2937;
+            --text-light: #6B7280;
+            --border: #E5E7EB;
+            --radius: 0.75rem;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: var(--background);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* --- Utilities --- */
+        .hidden { display: none !important; }
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border-radius: var(--radius);
+            border: none;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.95rem;
+        }
+        .btn-primary { background-color: var(--primary); color: white; }
+        .btn-primary:hover { background-color: var(--primary-hover); }
+        .btn-outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        .btn-outline:hover { background-color: var(--background); }
+        .btn-danger { background-color: var(--danger); color: white; }
+        .btn-success { background-color: var(--success); color: white; }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 1rem;
+            font-size: 1rem;
+            transition: border-color 0.2s;
+        }
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* --- Navigation --- */
+        header {
+            background: var(--surface);
+            padding: 1rem 2rem;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 1.5rem;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        nav button {
+            background: none;
+            border: none;
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-left: 1.5rem;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        nav button.active {
+            color: var(--primary);
+        }
+
+        /* --- Main Layout --- */
+        main {
+            flex: 1;
+            max-width: 1200px;
+            margin: 2rem auto;
+            width: 95%;
+            padding-bottom: 3rem;
+        }
+
+        /* --- Landing Page --- */
+        .hero {
+            text-align: center;
+            padding: 4rem 1rem;
+        }
+        .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; color: var(--text-main); }
+        .hero p { font-size: 1.25rem; color: var(--text-light); margin-bottom: 2rem; }
+        .role-selector {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        /* --- Admin Dashboard --- */
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+        .exam-list-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        .exam-list-item:last-child { border-bottom: none; }
+        .exam-meta { font-size: 0.9rem; color: var(--text-light); }
+        
+        /* Question Builder */
+        .question-builder { margin-top: 1rem; }
+        .option-input {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .correct-radio { cursor: pointer; accent-color: var(--success); transform: scale(1.2); }
+
+        /* --- Student Interface --- */
+        .exam-intro { max-width: 600px; margin: 0 auto; text-align: center; }
+        
+        .test-interface {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            gap: 2rem;
+            align-items: start;
+        }
+        
+        .test-sidebar {
+            background: var(--surface);
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 6rem;
+        }
+        
+        .timer-display {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 1rem 0;
+            color: var(--primary);
+        }
+        .timer-warning { color: var(--danger); animation: pulse 1s infinite; }
+        
+        .question-nav {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+        }
+        .q-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--background);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .q-dot:hover { background: #e0e7ff; }
+        .q-dot.active { border-color: var(--primary); background: white; color: var(--primary); font-weight: 700; }
+        .q-dot.answered { background: var(--primary); color: white; }
+        
+        .question-area {
+            background: var(--surface);
+            padding: 2rem;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            min-height: 400px;
+        }
+        
+        .q-text { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; line-height: 1.5; }
+        .options-list { list-style: none; }
+        .option-item {
+            padding: 1rem;
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            margin-bottom: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .option-item:hover { border-color: #c7d2fe; background: #f8fafc; }
+        .option-item.selected {
+            border-color: var(--primary);
+            background: #eef2ff;
+            color: var(--primary);
+            font-weight: 500;
+        }
+        .option-marker {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+        .option-item.selected .option-marker {
+            border-color: var(--primary);
+            background: var(--primary);
+            color: white;
+        }
+
+        .test-footer {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 2rem;
+        }
+
+        /* --- Results View --- */
+        .results-container {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        .score-circle {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            border: 8px solid var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin: 2rem auto;
+        }
+        .score-details {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        .stat-box { background: var(--surface); padding: 1.5rem; border-radius: var(--radius); }
+        .stat-value { font-size: 1.5rem; font-weight: 700; }
+        .stat-label { color: var(--text-light); font-size: 0.9rem; }
+
+        /* --- Toast Notification --- */
+        #toast-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+        .toast {
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            margin-top: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .test-interface { grid-template-columns: 1fr; }
+            .test-sidebar { position: relative; top: 0; margin-bottom: 1rem; }
+            .question-nav { grid-template-columns: repeat(8, 1fr); }
+            header { padding: 1rem; }
+            .logo span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fa-solid fa-layer-group"></i>
+            <span>ProCBT</span>
+        </div>
+        <nav>
+            <button onclick="app.showHome()" id="nav-home" class="active">Home</button>
+            <button onclick="app.showAdmin()" id="nav-admin">Admin Dashboard</button>
+            <button onclick="app.showStudentLogin()" id="nav-student">Student Portal</button>
+        </nav>
+    </header>
+
+    <!-- Main Content Area -->
+    <main id="main-content">
+        <!-- Views will be injected here by JavaScript -->
+    </main>
+
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <script>
+        // --- State Management ---
+        const state = {
+            currentView: 'home',
+            exams: JSON.parse(localStorage.getItem('cbt_exams')) || [
+                {
+                    id: 171543,
+                    title: 'General Knowledge Demo',
+                    duration: 10, // minutes
+                    questions: [
+                        { id: 1, text: 'What is the capital of France?', options: ['Berlin', 'Madrid', 'Paris', 'Rome'], correct: 2 },
+                        { id: 2, text: 'Which planet is known as the Red Planet?', options: ['Earth', 'Mars', 'Jupiter', 'Venus'], correct: 1 },
+                        { id: 3, text: 'What is 2 + 2?', options: ['3', '4', '5', '6'], correct: 1 }
+                    ]
+                }
+            ],
+            activeExam: null,
+            userAnswers: {},
+            timerInterval: null,
+            timeRemaining: 0,
+            currentQuestionIndex: 0,
+            studentName: ''
+        };
+
+        // --- Core Application Logic ---
+        const app = {
+            init: () => {
+                app.showHome();
+            },
+
+            // Navigation Handlers
+            showHome: () => {
+                state.currentView = 'home';
+                app.updateNav('nav-home');
+                render.home();
+            },
+
+            showAdmin: () => {
+                state.currentView = 'admin';
+                app.updateNav('nav-admin');
+                render.admin();
+            },
+
+            showStudentLogin: () => {
+                state.currentView = 'student-login';
+                app.updateNav('nav-student');
+                render.studentLogin();
+            },
+
+            updateNav: (activeId) => {
+                document.querySelectorAll('nav button').forEach(btn => btn.classList.remove('active'));
+                document.getElementById(activeId)?.classList.add('active');
+            },
+
+            // --- Actions ---
+
+            // Admin Actions
+            createExam: () => {
+                state.currentView = 'create-exam';
+                render.createExamForm();
+            },
+
+            saveExam: (e) => {
+                e.preventDefault();
+                const form = e.target;
+                const title = form.title.value;
+                const duration = parseInt(form.duration.value);
+                
+                // Collect questions
+                const questionElements = document.querySelectorAll('.question-block');
+                const questions = [];
+                
+                questionElements.forEach((qBlock, index) => {
+                    const qText = qBlock.querySelector('.q-text-input').value;
+                    const options = Array.from(qBlock.querySelectorAll('.opt-text-input')).map(i => i.value);
+                    const correctInput = qBlock.querySelector('.correct-radio:checked');
+                    
+                    if(qText && options.length >= 2 && correctInput) {
+                        questions.push({
+                            id: Date.now() + index,
+                            text: qText,
+                            options: options,
+                            correct: parseInt(correctInput.value)
+                        });
+                    }
+                });
+
+                if (questions.length === 0) {
+                    app.toast('Please add at least one valid question.', 'error');
+                    return;
+                }
+
+                const newExam = {
+                    id: Date.now(),
+                    title,
+                    duration,
+                    questions
+                };
+
+                state.exams.push(newExam);
+                app.saveData();
+                app.toast('Exam created successfully!', 'success');
+                app.showAdmin();
+            },
+
+            deleteExam: (id) => {
+                if(confirm('Are you sure you want to delete this exam?')) {
+                    state.exams = state.exams.filter(e => e.id !== id);
+                    app.saveData();
+                    app.toast('Exam deleted.', 'success');
+                    render.admin();
+                }
+            },
+
+            // Student Actions
+            startExam: (examId) => {
+                const exam = state.exams.find(e => e.id === examId);
+                if (!exam) return;
+
+                state.activeExam = exam;
+                state.userAnswers = {};
+                state.timeRemaining = exam.duration * 60;
+                state.currentQuestionIndex = 0;
+                
+                app.startTimer();
+                state.currentView = 'exam-taking';
+                render.examInterface();
+            },
+
+            startTimer: () => {
+                if (state.timerInterval) clearInterval(state.timerInterval);
+                
+                const timerDisplay = document.getElementById('timer-display');
+                
+                state.timerInterval = setInterval(() => {
+                    state.timeRemaining--;
+                    
+                    const m = Math.floor(state.timeRemaining / 60);
+                    const s = state.timeRemaining % 60;
+                    
+                    if (timerDisplay) {
+                        timerDisplay.textContent = `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+                        
+                        if (state.timeRemaining < 60) {
+                            timerDisplay.classList.add('timer-warning');
+                        }
+                    }
+
+                    if (state.timeRemaining <= 0) {
+                        app.submitExam(true);
+                    }
+                }, 1000);
+            },
+
+            selectAnswer: (questionId, optionIndex) => {
+                state.userAnswers[questionId] = optionIndex;
+                render.updateQuestionNav(); // Update the dots
+                render.updateOptionStyles(questionId, optionIndex);
+            },
+
+            navQuestion: (index) => {
+                state.currentQuestionIndex = index;
+                render.examInterface(); // Re-render to show new question
+            },
+
+            submitExam: (auto = false) => {
+                clearInterval(state.timerInterval);
+                const score = app.calculateScore();
+                state.currentView = 'results';
+                render.results(score, auto);
+            },
+
+            calculateScore: () => {
+                let correctCount = 0;
+                state.activeExam.questions.forEach(q => {
+                    if (state.userAnswers[q.id] === q.correct) {
+                        correctCount++;
+                    }
+                });
+                return {
+                    obtained: correctCount,
+                    total: state.activeExam.questions.length,
+                    percentage: Math.round((correctCount / state.activeExam.questions.length) * 100)
+                };
+            },
+
+            saveData: () => {
+                localStorage.setItem('cbt_exams', JSON.stringify(state.exams));
+            },
+
+            toast: (msg, type = 'info') => {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'toast';
+                
+                let icon = type === 'success' ? 'fa-check-circle' : (type === 'error' ? 'fa-exclamation-circle' : 'fa-info-circle');
+                let color = type === 'success' ? '#10B981' : (type === 'error' ? '#EF4444' : '#3B82F6');
+                
+                toast.innerHTML = `<i class="fa-solid ${icon}" style="color:${color}"></i> <span>${msg}</span>`;
+                container.appendChild(toast);
+                
+                setTimeout(() => {
+                    toast.style.opacity = '0';
+                    setTimeout(() => toast.remove(), 300);
+                }, 3000);
+            }
+        };
+
+        // --- Render Functions ---
+        const render = {
+            home: () => {
+                document.getElementById('main-content').innerHTML = `
+                    <div class="hero">
+                        <h1>Welcome to ProCBT</h1>
+                        <p>A modern, professional Computer Based Test platform for seamless assessment.</p>
+                        <div class="role-selector">
+                            <button class="btn btn-primary" onclick="app.showStudentLogin()">
+                                <i class="fa-solid fa-user-graduate"></i> Take Exam
+                            </button>
+                            <button class="btn btn-outline" onclick="app.showAdmin()">
+                                <i class="fa-solid fa-user-shield"></i> Administrator
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
+
+            admin: () => {
+                const examList = state.exams.length ? state.exams.map(exam => `
+                    <div class="card">
+                        <div class="exam-list-item">
+                            <div>
+                                <h3>${exam.title}</h3>
+                                <div class="exam-meta">
+                                    <i class="fa-regular fa-clock"></i> ${exam.duration} mins | 
+                                    <i class="fa-solid fa-list"></i> ${exam.questions.length} Questions
+                                </div>
+                            </div>
+                            <button class="btn btn-danger" onclick="app.deleteExam(${exam.id})">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('') : '<div class="card" style="text-align:center; color: var(--text-light);">No exams found. Create one!</div>';
+
+                document.getElementById('main-content').innerHTML = `
+                    <div class="admin-header">
+                        <h2>Admin Dashboard</h2>
+                        <button class="btn btn-primary" onclick="app.createExam()">
+                            <i class="fa-solid fa-plus"></i> Create New Exam
+                        </button>
+                    </div>
+                    ${examList}
+                `;
+            },
+
+            createExamForm: () => {
+                document.getElementById('main-content').innerHTML = `
+                    <div class="card" style="max-width: 800px; margin: 0 auto;">
+                        <h2 style="margin-bottom: 1.5rem;">Create New Exam</h2>
+                        <form onsubmit="app.saveExam(event)">
+                            <label>Exam Title</label>
+                            <input type="text" name="title" required placeholder="e.g., Mathematics End of Term">
+                            
+                            <label>Duration (Minutes)</label>
+                            <input type="number" name="duration" required min="1" value="30">
+                            
+                            <div id="questions-container"></div>
+                            
+                            <button type="button" class="btn btn-outline" onclick="render.addQuestionBlock()" style="margin-top: 1rem; width: 100%; border-style: dashed;">
+                                <i class="fa-solid fa-plus"></i> Add Question
+                            </button>
+                            
+                            <div style="margin-top: 2rem; display: flex; gap: 1rem; justify-content: flex-end;">
+                                <button type="button" class="btn btn-outline" onclick="app.showAdmin()">Cancel</button>
+                                <button type="submit" class="btn btn-primary">Save Exam</button>
+                            </div>
+                        </form>
+                    </div>
+                `;
+                render.addQuestionBlock(); // Add first question by default
+            },
+
+            addQuestionBlock: () => {
+                const container = document.getElementById('questions-container');
+                const index = container.children.length + 1;
+                const block = document.createElement('div');
+                block.className = 'card question-builder';
+                block.style.border = '1px solid var(--border)';
+                block.style.boxShadow = 'none';
+                block.innerHTML = `
+                    <h4 style="margin-bottom: 1rem;">Question ${index}</h4>
+                    <input type="text" class="q-text-input" placeholder="Enter question text..." required>
+                    
+                    <label style="font-size: 0.9rem; color: var(--text-light);">Options (Select radio button for correct answer)</label>
+                    ${[0, 1, 2, 3].map(i => `
+                        <div class="option-input">
+                            <input type="radio" name="correct-${Date.now()}-${index}" class="correct-radio" value="${i}" ${i===0?'checked':''} title="Mark as correct">
+                            <input type="text" class="opt-text-input" placeholder="Option ${i+1}" required>
+                        </div>
+                    `).join('')}
+                    <button type="button" class="btn btn-danger" style="padding: 0.25rem 0.5rem; font-size: 0.8rem; margin-top: 0.5rem;" onclick="this.closest('.question-builder').remove()">Remove Question</button>
+                `;
+                container.appendChild(block);
+            },
+
+            studentLogin: () => {
+                document.getElementById('main-content').innerHTML = `
+                    <div class="card exam-intro">
+                        <h2>Student Login</h2>
+                        <p style="color: var(--text-light); margin-bottom: 1.5rem;">Enter your details to view available exams.</p>
+                        
+                        <form onsubmit="event.preventDefault(); state.studentName = this.student.value; render.examList();">
+                            <input type="text" name="student" placeholder="Full Name" required style="text-align: center;">
+                            <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">Continue</button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            examList: () => {
+                if (state.exams.length === 0) {
+                    document.getElementById('main-content').innerHTML = `
+                        <div class="hero">
+                            <h3>Hello, ${state.studentName}</h3>
+                            <p>No exams are currently available.</p>
+                            <button class="btn btn-outline" onclick="app.showHome()">Back Home</button>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const cards = state.exams.map(exam => `
+                    <div class="card" style="text-align: center;">
+                        <h3>${exam.title}</h3>
+                        <p class="exam-meta" style="margin: 1rem 0;">
+                            <i class="fa-regular fa-clock"></i> ${exam.duration} Minutes<br>
+                            <i class="fa-solid fa-list-ol"></i> ${exam.questions.length} Questions
+                        </p>
+                        <button class="btn btn-primary" onclick="app.startExam(${exam.id})">Start Exam</button>
+                    </div>
+                `).join('');
+
+                document.getElementById('main-content').innerHTML = `
+                    <div style="text-align: center; margin-bottom: 2rem;">
+                        <h2>Available Exams</h2>
+                        <p>Welcome, <strong>${state.studentName}</strong>. Select an exam below.</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1.5rem;">
+                        ${cards}
+                    </div>
+                    <div style="text-align: center; margin-top: 2rem;">
+                        <button class="btn btn-outline" onclick="app.showHome()">Logout</button>
+                    </div>
+                `;
+            },
+
+            examInterface: () => {
+                const exam = state.activeExam;
+                const q = exam.questions[state.currentQuestionIndex];
+                const progress = Math.round(((state.currentQuestionIndex + 1) / exam.questions.length) * 100);
+
+                // Generate Question Nav Dots
+                const dotsHTML = exam.questions.map((_, idx) => {
+                    let className = 'q-dot';
+                    if (state.currentQuestionIndex === idx) className += ' active';
+                    if (state.userAnswers[exam.questions[idx].id] !== undefined) className += ' answered';
+                    return `<div class="${className}" onclick="app.navQuestion(${idx})">${idx + 1}</div>`;
+                }).join('');
+
+                // Generate Options
+                const optionsHTML = q.options.map((opt, idx) => {
+                    const isSelected = state.userAnswers[q.id] === idx;
+                    return `
+                        <li class="option-item ${isSelected ? 'selected' : ''}" onclick="app.selectAnswer(${q.id}, ${idx})">
+                            <div class="option-marker">${String.fromCharCode(65 + idx)}</div>
+                            <span>${opt}</span>
+                        </li>
+                    `;
+                }).join('');
+
+                document.getElementById('main-content').innerHTML = `
+                    <div class="test-interface">
+                        <aside class="test-sidebar">
+                            <div style="font-weight: 600; margin-bottom: 0.5rem;">Time Remaining</div>
+                            <div id="timer-display" class="timer-display">
+                                ${Math.floor(state.timeRemaining / 60).toString().padStart(2,'0')}:${(state.timeRemaining % 60).toString().padStart(2,'0')}
+                            </div>
+                            
+                            <div style="margin-top: 1.5rem; font-weight: 600;">Question Map</div>
+                            <div class="question-nav">
+                                ${dotsHTML}
+                            </div>
+                            
+                            <button class="btn btn-success" style="width: 100%; margin-top: 2rem;" onclick="app.submitExam()">
+                                <i class="fa-solid fa-paper-plane"></i> Submit Exam
+                            </button>
+                        </aside>
+                        
+                        <section class="question-area">
+                            <div style="display: flex; justify-content: space-between; color: var(--text-light); margin-bottom: 1rem; font-size: 0.9rem;">
+                                <span>Question ${state.currentQuestionIndex + 1} of ${exam.questions.length}</span>
+                                <span>${progress}% Completed</span>
+                            </div>
+                            
+                            <div class="q-text">${q.text}</div>
+                            <ul class="options-list">
+                                ${optionsHTML}
+                            </ul>
+                            
+                            <div class="test-footer">
+                                <button class="btn btn-outline" onclick="app.navQuestion(${state.currentQuestionIndex - 1})" ${state.currentQuestionIndex === 0 ? 'disabled style="opacity:0.5"' : ''}>
+                                    <i class="fa-solid fa-arrow-left"></i> Previous
+                                </button>
+                                <button class="btn btn-primary" onclick="app.navQuestion(${state.currentQuestionIndex + 1})" ${state.currentQuestionIndex === exam.questions.length - 1 ? 'disabled style="opacity:0.5"' : ''}>
+                                    Next <i class="fa-solid fa-arrow-right"></i>
+                                </button>
+                            </div>
+                        </section>
+                    </div>
+                `;
+            },
+
+            updateQuestionNav: () => {
+                // Re-render only the dots to avoid flickering full interface
+                const dots = document.querySelectorAll('.q-dot');
+                const exam = state.activeExam;
+                dots.forEach((dot, idx) => {
+                    if (state.userAnswers[exam.questions[idx].id] !== undefined) {
+                        dot.classList.add('answered');
+                    } else {
+                        dot.classList.remove('answered');
+                    }
+                });
+            },
+
+            updateOptionStyles: (qId, selectedIdx) => {
+                const items = document.querySelectorAll('.option-item');
+                items.forEach((item, idx) => {
+                    if (idx === selectedIdx) {
+                        item.classList.add('selected');
+                    } else {
+                        item.classList.remove('selected');
+                    }
+                });
+            },
+
+            results: (score, auto) => {
+                let message = '';
+                let color = '';
+                
+                if (score.percentage >= 70) { message = 'Excellent Work!'; color = 'var(--success)'; }
+                else if (score.percentage >= 50) { message = 'Good Effort!'; color = 'var(--warning)'; }
+                else { message = 'Needs Improvement'; color = 'var(--danger)'; }
+
+                document.getElementById('main-content').innerHTML = `
+                    <div class="card results-container">
+                        <h2>${auto ? 'Time Up!' : 'Exam Submitted'}</h2>
+                        <p>Here is your result summary, <strong>${state.studentName}</strong>.</p>
+                        
+                        <div class="score-circle" style="border-color: ${color}; color: ${color}">
+                            ${score.percentage}%
+                        </div>
+                        
+                        <h3 style="color: ${color}">${message}</h3>
+                        
+                        <div class="score-details">
+                            <div class="stat-box">
+                                <div class="stat-value">${score.obtained}</div>
+                                <div class="stat-label">Correct</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${score.total - score.obtained}</div>
+                                <div class="stat-label">Wrong</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-value">${score.total}</div>
+                                <div class="stat-label">Total Questions</div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" style="margin-top: 2rem;" onclick="app.showHome()">
+                            Back to Home
+                        </button>
+                    </div>
+                `;
+            }
+        };
+
+        // Initialize App
+        document.addEventListener('DOMContentLoaded', app.init);
+
+    </script>
+</body>
+</html>
